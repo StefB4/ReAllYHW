@@ -106,8 +106,9 @@ if __name__ == "__main__":
     print(agent.model.trainable_variables)
 
     GAMMA = 0.9
-    EPSILONSTART = 0.8
-    EPSILONANNEAL = 0.01
+    EPSILONSTART = 0.99
+    EPSILONDECAYRATE = 0.005
+    EPSILONMIN = 0.01
 
     for e in range(epochs):
 
@@ -180,8 +181,11 @@ if __name__ == "__main__":
         #)
 
         # yeu can also alter your managers parameters
-        print("Updating epsilon to " + str(EPSILONSTART*(1+EPSILONANNEAL)**(e+1)))
-        manager.set_epsilon(epsilon=EPSILONSTART*(1+EPSILONANNEAL)**(e+1))
+        new_epsilon = EPSILONSTART*(1-EPSILONDECAYRATE)**(e+1)
+        if (new_epsilon < EPSILONMIN):
+            new_epsilon = EPSILONMIN
+        print("Updating epsilon to " + str(new_epsilon))
+        manager.set_epsilon(epsilon=new_epsilon)
 
         if e % saving_after == 0:
             # you can save models
