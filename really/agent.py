@@ -117,7 +117,7 @@ class Agent:
                     [probs[i][a] for i, a in zip(range(logits.shape[0]), action)]
                 )
 
-        elif self.action_sampling_type == "continuous_normal_diagonal":
+        elif self.action_sampling_type == "continuous_normal_diagonal___orig": # added ___orig 
 
             mus, sigmas = network_out["mu"].numpy(), network_out["sigma"].numpy()
             action = norm.rvs(mus, sigmas)
@@ -127,6 +127,30 @@ class Agent:
 
             if return_log_prob:
                 output["log_probability"] = np.sum(norm.logpdf(action, mus, sigmas))
+
+        ######## ADDED
+        elif self.action_sampling_type == "continuous_normal_diagonal":
+
+            mus, sigmas = network_out["mu"].numpy(), network_out["sigma"].numpy()
+            print(mus.shape)
+            print(sigmas.shape)
+            action = norm.rvs(mus, sigmas)
+            if action[0] <= -1:
+                action[0] = -0.99 
+            if action[0] >= 1:
+                action[0] = 0.99 
+            if action[1] <= -1:
+                action[1] = -0.99 
+            if action[1] >= 1:
+                action[1] = 0.99 
+            action = list(action.flatten())
+            output["action"] = action
+            logging.warning('action')
+            logging.warning(action)
+
+            if return_log_prob:
+                output["log_probability"] = np.sum(norm.logpdf(action, mus, sigmas))
+        ######## 
 
         elif self.action_sampling_type == "discrete_policy":
             logits = network_out["policy"]
